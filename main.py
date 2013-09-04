@@ -1,28 +1,40 @@
+import sys
 import random
+import itertools
 import pygame
 
 pygame.init()
+
+W = 640
+H = 400
 
 def show_score(font, score):
     return font.render('Score: {}'.format(score), 1, (255,0,0))
 
 def generate_point():
-    return (random.randint(50,590), random.randint(50,430))
+    return (random.randint(50,590), random.randint(50,350))
 
 
-def main():
+def main(args):
     is_running = True
-    window = pygame.display.set_mode((640, 480))
-    pygame.display.set_caption('Batata')
+    window = pygame.display.set_mode((640, 400))
+    pygame.display.set_caption('Croc Eat Cats')
+
+    if len(args) > 1 and args[1] == 'full':
+        pygame.display.toggle_fullscreen()
+
     screen = pygame.display.get_surface()
     clock = pygame.time.Clock()
 
     x, y = 50, 50
     score = 0
 
+    bg_img = pygame.image.load('bg.jpg')
     croc_img = pygame.image.load('croc.png')
     cat_img = pygame.image.load('cat.png')
     tiger_img = pygame.image.load('tiger.png')
+    meow = pygame.mixer.Sound('cat.wav')
+    roar = pygame.mixer.Sound('tiger.wav')
 
     mono = pygame.font.SysFont('monospace', 15)
 
@@ -72,11 +84,11 @@ def main():
             x -= 5
 
         if x > 600: x = 20
-        if y > 440: y = 20
+        if y > 360: y = 20
         if x < 20: x = 600
-        if y < 20: y = 440
+        if y < 20: y = 360
 
-        screen.fill((255,255,255))
+        screen.blit(bg_img, (0,0))
 
         for cat in cats:
             a = pygame.Rect(cat, cat_img.get_size())
@@ -96,11 +108,13 @@ def main():
 
             if b.colliderect(a):
                 score -= 5
+                roar.play()
                 tigers.remove(tiger)
             else:
                 screen.blit(tiger_img, tiger)
 
         if len(cats) < 10:
+            meow.play()
             cats.append(generate_point())
 
         screen.blit(croc_img, (x,y), choice)
@@ -109,4 +123,4 @@ def main():
         clock.tick(30)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
