@@ -1,23 +1,28 @@
 import sys
 import random
-import itertools
 import pygame
 
 pygame.init()
 
 W = 640
 H = 400
+OFFSET = 50
+MAX_CATS = 10
+START_POSITION = (OFFSET, OFFSET)
+
 
 def show_score(font, score):
-    return font.render('Score: {}'.format(score), 1, (255,0,0))
+    return font.render('Score: {}'.format(score), 1, (255, 0, 0))
+
 
 def generate_point():
-    return (random.randint(50,590), random.randint(50,350))
+    return (random.randint(OFFSET, W-OFFSET),
+            random.randint(OFFSET, H-OFFSET))
 
 
 def main(args):
     is_running = True
-    window = pygame.display.set_mode((640, 400))
+    pygame.display.set_mode((W, H))
     pygame.display.set_caption('Croc Eat Cats')
 
     if len(args) > 1 and args[1] == 'full':
@@ -26,7 +31,7 @@ def main(args):
     screen = pygame.display.get_surface()
     clock = pygame.time.Clock()
 
-    x, y = 50, 50
+    x, y = START_POSITION
     score = 0
 
     bg_img = pygame.image.load('bg.jpg')
@@ -42,15 +47,15 @@ def main(args):
         (20,  0, 45, 55),
         (100, 0, 45, 55),
         (180, 0, 45, 55),
-        (20, 155, 45, 55),
-        (100,155, 45, 55),
-        (180,155, 45, 55),
+        (20,  155, 45, 55),
+        (100, 155, 45, 55),
+        (180, 155, 45, 55),
         (0, 110, 80, 30),
-        (85,110, 80, 30),
-        (165,110, 80, 30),
+        (85, 110, 80, 30),
+        (165, 110, 80, 30),
         (0, 60, 80, 30),
-        (85,60, 80, 30),
-        (165,60, 80, 30),
+        (85, 60, 80, 30),
+        (165, 60, 80, 30),
     )
 
     choice = croc_map[0]
@@ -63,7 +68,7 @@ def main(args):
         if ev.type == pygame.KEYDOWN:
             key = ev.dict['key']
             if key == 27:
-                is_running = False 
+                is_running = False
 
         keys = pygame.key.get_pressed()
 
@@ -83,28 +88,32 @@ def main(args):
             choice = random.choice(croc_map[9:12])
             x -= 5
 
-        if x > 600: x = 20
-        if y > 360: y = 20
-        if x < 20: x = 600
-        if y < 20: y = 360
+        if x > 600:
+            x = 20
+        if y > 360:
+            y = 20
+        if x < 20:
+            x = 600
+        if y < 20:
+            y = 360
 
-        screen.blit(bg_img, (0,0))
+        screen.blit(bg_img, (0, 0))
 
         for cat in cats:
             a = pygame.Rect(cat, cat_img.get_size())
-            b = pygame.Rect((x,y), choice[2:])
+            b = pygame.Rect((x, y), choice[2:])
 
             if b.colliderect(a):
                 score += 1
                 cats.remove(cat)
-                if score % 5 == 0: 
+                if score % 5 == 0:
                     tigers.append(generate_point())
             else:
                 screen.blit(cat_img, cat)
 
         for tiger in tigers:
             a = pygame.Rect(tiger, tiger_img.get_size())
-            b = pygame.Rect((x,y), choice[2:])
+            b = pygame.Rect((x, y), choice[2:])
 
             if b.colliderect(a):
                 score -= 5
@@ -113,12 +122,12 @@ def main(args):
             else:
                 screen.blit(tiger_img, tiger)
 
-        if len(cats) < 10:
+        if len(cats) < MAX_CATS:
             meow.play()
             cats.append(generate_point())
 
-        screen.blit(croc_img, (x,y), choice)
-        screen.blit(show_score(mono, score), (10,10))
+        screen.blit(croc_img, (x, y), choice)
+        screen.blit(show_score(mono, score), (10, 10))
         pygame.display.flip()
         clock.tick(30)
 
